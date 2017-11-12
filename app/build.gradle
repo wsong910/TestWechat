@@ -1,0 +1,106 @@
+apply plugin: 'com.android.application'
+
+def releaseTime() {
+    return new Date().format("yyMMdd", TimeZone.getTimeZone("UTC"))
+}
+
+def getReleaseStorePassword() {
+    return hasProperty('KEYSTORE_PASSWORD') ? KEYSTORE_PASSWORD : ""
+}
+
+def getReleaseKeyPassword() {
+    return hasProperty('KEY_PASSWORD') ? KEY_PASSWORD : ""
+}
+
+def getAlias() {
+    return hasProperty('KEY_ALIAS') ? KEY_ALIAS : ""
+}
+
+android {
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "com.song.testwechatdemo"
+        minSdkVersion 16
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        setProperty("archivesBaseName", "TestWechat_v[$versionName]_c[$versionCode]_${releaseTime()}")
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file("../test_wechat.keystore")
+            storePassword getReleaseStorePassword()
+            keyAlias getAlias()
+            keyPassword getReleaseStorePassword()
+            v2SigningEnabled false
+        }
+        release {
+            storeFile file("../test_wechat.keystore")
+            storePassword getReleaseStorePassword()
+            keyAlias getAlias()
+            keyPassword getReleaseKeyPassword()
+            v2SigningEnabled false
+        }
+    }
+
+    buildTypes {
+        debug {
+            // 显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            versionNameSuffix "-debug"
+            minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            multiDexEnabled false
+            signingConfig signingConfigs.debug
+        }
+        release {
+//            versionNameSuffix "-release"
+            // 不显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            minifyEnabled true
+            zipAlignEnabled true
+            // dex突破65535的限制
+            multiDexEnabled false
+            // 移除无用的resource文件
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
+    implementation 'com.github.bumptech.glide:glide:4.3.1'
+    implementation 'com.github.bumptech.glide:okhttp3-integration:4.1.0@aar'
+//    implementation "com.google.guava:guava:20.0"
+    //noinspection GradleDynamicVersion
+    implementation 'com.android.support:appcompat-v7:26+'
+    //noinspection GradleDynamicVersion
+    implementation 'com.android.support:support-fragment:26+'
+    //noinspection GradleDynamicVersion
+    implementation 'com.android.support:recyclerview-v7:26+'
+    //noinspection GradleDynamicVersion
+    implementation 'com.android.support:design:26+'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.2.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.2.0'
+    implementation 'io.reactivex:rxjava:1.3.0'
+    implementation 'io.reactivex:rxandroid:1.2.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
+    implementation 'com.squareup.sqlbrite:sqlbrite:1.1.1'
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+}
